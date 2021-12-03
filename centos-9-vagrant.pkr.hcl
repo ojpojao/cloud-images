@@ -3,8 +3,8 @@
  */
 
 variables {
-  c9s_iso_url_x86_64       = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-20211118.2-x86_64-boot.iso"
-  c9s_iso_checksum_x86_64  = "file:http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-20211118.2-x86_64-boot.iso.SHA256SUM"
+  c9s_iso_url_x86_64       = "http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-20211201.1-x86_64-boot.iso"
+  c9s_iso_checksum_x86_64  = "file:http://mirror.stream.centos.org/9-stream/BaseOS/x86_64/iso/CentOS-Stream-9-20211201.1-x86_64-boot.iso.SHA256SUM"
   c9s_vagrant_boot_command = [
     "<tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/centos-9.vagrant.ks<enter><wait>"
   ]
@@ -34,6 +34,23 @@ source "vmware-iso" "centos-9" {
   }
 
   vmx_remove_ethernet_interfaces = true
+}
+
+source "parallels-iso" "centos-9" {
+  iso_checksum           = var.c9s_iso_checksum_x86_64
+  iso_url                = var.c9s_iso_url_x86_64
+  boot_command           = var.c9s_vagrant_boot_command
+  boot_wait              = var.boot_wait
+  cpus                   = var.cpus
+  memory                 = var.memory
+  disk_size              = var.vagrant_disk_size
+  parallels_tools_flavor = var.parallels_tools_flavor_x86_64
+  http_directory         = var.http_directory
+  guest_os_type          = "centos"
+  shutdown_command       = var.vagrant_shutdown_command
+  ssh_username           = var.vagrant_ssh_username
+  ssh_password           = var.vagrant_ssh_password
+  ssh_timeout            = var.ssh_timeout
 }
 
 source "qemu" "centos-9" {
@@ -87,6 +104,7 @@ source "virtualbox-iso" "centos-9" {
 build {
   sources = [
     "sources.vmware-iso.centos-9",
+    "sources.parallels-iso.centos-9",
     "sources.qemu.centos-9",
     "sources.virtualbox-iso.centos-9"
   ]
