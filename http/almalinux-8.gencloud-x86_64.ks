@@ -33,7 +33,8 @@ reboot --eject
 %packages
 @core
 -biosdevname
--open-vm-tools
+# -open-vm-tools
+-qemu-guest-agent
 -plymouth
 -dnf-plugin-spacewalk
 -rhn*
