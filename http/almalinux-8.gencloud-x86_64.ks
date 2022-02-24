@@ -10,8 +10,8 @@ eula --agreed
 firstboot --disabled
 
 lang en_US.UTF-8
-keyboard us
-timezone UTC --isUtc
+keyboard --vckeymap=br --xlayouts='br'
+timezone America/Belem --ntpservers=a.ntp.br,b.ntp.br
 
 network --bootproto=dhcp
 firewall --enabled --service=ssh
