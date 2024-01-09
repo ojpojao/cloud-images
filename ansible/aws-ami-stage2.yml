@@ -4,6 +4,16 @@
   become: true
 
   tasks:
+    - name: Install AWS Systems Manager Agent (SSM Agent)
+      dnf:
+        name: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+        state: present
+
+
+    - name: Delete DNF cache
+      command: dnf clean all
+
+
     - name: Add IPv6 Support
       lineinfile:
         path: /etc/sysconfig/network-scripts/ifcfg-eth0
@@ -70,11 +80,14 @@
         state: absent
       loop:
         - /etc/cloud/cloud.cfg.d/vmimport.99-disable-network-config.cfg
-        - /etc/resolv.conf
         - /tmp
         - /var/tmp
         - /var/log/tuned
         - /var/lib/cloud
+        - /var/log/amazon
+        - /etc/machine-info
+        - /var/lib/systemd/credential.secret
+        - /var/lib/systemd/random-seed
 
 
     - name: Find log files
@@ -94,16 +107,34 @@
       loop: "{{ log_files.files }}"
 
 
+    - name: Find sudoers files created by AWS VM Import/Export
+      find:
+        file_type: file
+        paths:
+          - /etc/sudoers.d/
+        patterns: '*'
+      register: sudoers_files
+
+
+    - name: Remove found sudoers files
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ sudoers_files.files }}"
+
+
     - name: Truncate files
       command: "truncate -s 0 {{ item }}"
       loop:
         - /etc/machine-id
+        - /etc/hostname
+        - /etc/resolv.conf
         - /var/log/audit/audit.log
         - /var/log/wtmp
         - /var/log/lastlog
         - /var/log/btmp
         - /var/log/cron
         - /var/log/maillog
-        - /var/log/spooler
-        - /var/log/secure
         - /var/log/messages
+        - /var/log/secure
+        - /var/log/spooler
